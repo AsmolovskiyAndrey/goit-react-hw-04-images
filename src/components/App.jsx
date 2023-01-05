@@ -1,4 +1,3 @@
-// import { fetchImages } from 'api/ApiSearch';
 import { useState, useEffect } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import css from './App.module.css';
@@ -24,29 +23,33 @@ export const App = () => {
       return;
     }
 
-    const fetchImages = async (search, page) => {
-      axios.defaults.baseURL = 'https://pixabay.com/api';
-      const API_KEY = '31273147-56325c5e652f187dddce9fa62';
+    const fetchImg = async (search, page) => {
+      const URL = 'https://pixabay.com/api';
+      const KEY = '31273147-56325c5e652f187dddce9fa62';
 
       try {
         setLoading(true);
+
         const newSub = await axios.get(
-          `/?key=${API_KEY}&per_page=12&q=${search}&page=${page}`
+          `${URL}/?key=${KEY}&per_page=12&q=${search}&page=${page}`
         );
 
-        setSubject(prevState => [...prevState, ...newSub.data.hits]);
+        const images = newSub.data.hits;
+        setSubject(prevState => [...prevState, ...images]);
 
-        newSub.data.hits.length === 12 ? setLoadMore(true) : setLoadMore(false);
+        images.length === 12 ? setLoadMore(true) : setLoadMore(false);
+
         setLoading(false);
 
-        if (newSub.length === 0) {
+        if (images.length === 0) {
           setNotFound(true);
         }
       } catch {
         setError(true);
       }
     };
-    fetchImages(search, page);
+
+    fetchImg(search, page);
   }, [search, page]);
 
   const searchSubject = event => {

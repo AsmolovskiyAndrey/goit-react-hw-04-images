@@ -5,7 +5,8 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { Modal } from 'components/Modal/Modal';
-import axios from 'axios';
+// import axios from 'axios';
+import { fetchImages } from 'api/ApiSearch';
 
 export const App = () => {
   const [subject, setSubject] = useState([]);
@@ -23,25 +24,16 @@ export const App = () => {
       return;
     }
 
-    const fetchImg = async (search, page) => {
-      const URL = 'https://pixabay.com/api';
-      const KEY = '31273147-56325c5e652f187dddce9fa62';
-
+    const fetchData = async () => {
       try {
-        setLoading(true);
+        const newSub = await fetchImages(search, page);
+        setSubject(prevState => [...prevState, ...newSub]);
 
-        const newSub = await axios.get(
-          `${URL}/?key=${KEY}&per_page=12&q=${search}&page=${page}`
-        );
-
-        const images = newSub.data.hits;
-        setSubject(prevState => [...prevState, ...images]);
-
-        images.length === 12 ? setLoadMore(true) : setLoadMore(false);
+        newSub.length === 12 ? setLoadMore(true) : setLoadMore(false);
 
         setLoading(false);
 
-        if (images.length === 0) {
+        if (newSub.length === 0) {
           setNotFound(true);
         }
       } catch {
@@ -49,8 +41,42 @@ export const App = () => {
       }
     };
 
-    fetchImg(search, page);
+    fetchData();
   }, [search, page]);
+
+  // useEffect(() => {
+  //   if (search === '') {
+  //     return;
+  //   }
+
+  //   const fetchImg = async (search, page) => {
+  //     const URL = 'https://pixabay.com/api';
+  //     const KEY = '31273147-56325c5e652f187dddce9fa62';
+
+  //     try {
+  //       setLoading(true);
+
+  //       const newSub = await axios.get(
+  //         `${URL}/?key=${KEY}&per_page=12&q=${search}&page=${page}`
+  //       );
+
+  //       const images = newSub.data.hits;
+  //       setSubject(prevState => [...prevState, ...images]);
+
+  //       images.length === 12 ? setLoadMore(true) : setLoadMore(false);
+
+  //       setLoading(false);
+
+  //       if (images.length === 0) {
+  //         setNotFound(true);
+  //       }
+  //     } catch {
+  //       setError(true);
+  //     }
+  //   };
+
+  //   fetchImg(search, page);
+  // }, [search, page]);
 
   const searchSubject = event => {
     setSearch(event.toLowerCase().trim());
